@@ -24,8 +24,6 @@ public class RenderFrame extends ImageFrame {
     private int amountPixelsRendered = 0;
     private long startTime = -1;
 
-    private BufferedImage renderImage;
-
     public RenderFrame(String title, int width, int height) {
         super(title);
 
@@ -57,11 +55,10 @@ public class RenderFrame extends ImageFrame {
     private void initialize(int width, int height) {
         setImage(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB));
 
-        renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-        final Graphics graphics = image.getGraphics();
+        final Graphics graphics = getImage().getGraphics();
         graphics.setColor(java.awt.Color.BLACK);
         graphics.fillRect(0, 0, width, height);
+        graphics.dispose();
     }
 
     public void reset(final int width, final int height) {
@@ -76,7 +73,7 @@ public class RenderFrame extends ImageFrame {
     }
 
     private void updateInfo() {
-        final int amountPixelsToRender = image.getWidth() * image.getHeight();
+        final int amountPixelsToRender = getImage().getWidth() * getImage().getHeight();
         final double percentageFinished = amountPixelsRendered / (double) amountPixelsToRender;
 
         final String progressString = PERCENT_FORMAT.format(100.0 * percentageFinished);
@@ -107,13 +104,11 @@ public class RenderFrame extends ImageFrame {
             timeRemainingInfoLabel.setText("Remaining:");
         }
 
-        final Graphics graphics = getImage().getGraphics();
-
-        graphics.drawImage(renderImage, 0, 0, null);
     }
 
     @Override
     protected void initUI() {
+        super.initUI();
         progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
 
         timeRemainingInfoLabel = new JLabel(" ");
@@ -160,7 +155,7 @@ public class RenderFrame extends ImageFrame {
     public synchronized void fillArea(int x, int y, int x2, int y2, Color color) {
         start();
 
-        final Graphics graphics = renderImage.getGraphics();
+        final Graphics graphics = getImage().getGraphics();
         graphics.setColor(new java.awt.Color(color.getIntColor()));
 
         final int width = x2 - x + 1;
@@ -174,8 +169,8 @@ public class RenderFrame extends ImageFrame {
     public synchronized void setPixel(int x, int y, Color color) {
         start();
 
-        if ((x >= 0) && (x < renderImage.getWidth()) && (y >= 0) && (y < renderImage.getHeight())) {
-            renderImage.setRGB(x, y, color.getIntColor());
+        if ((x >= 0) && (x < getImage().getWidth()) && (y >= 0) && (y < getImage().getHeight())) {
+            getImage().setRGB(x, y, color.getIntColor());
             repaintTimer.repaint();
         }
     }
@@ -186,10 +181,6 @@ public class RenderFrame extends ImageFrame {
 
     public synchronized void setPixelRendered(int amount) {
         amountPixelsRendered += amount;
-    }
-
-    public Color getPixel(int x, int y) {
-        return new Color(renderImage.getRGB(x, y));
     }
 
     public void setIterativePixel(int x, int y, Color color, int passage) {
@@ -209,16 +200,6 @@ public class RenderFrame extends ImageFrame {
         } else if (passage == 3) {
             setPixel(x + 0, y + 0, color);
         }
-    }
-
-/*
-    public void setInfo(String message) {
-        programInfoLabel.setText(message);
-    }
-*/
-
-    public BufferedImage getRenderImage() {
-        return renderImage;
     }
 
     class RepaintTimer implements Runnable {
@@ -250,7 +231,7 @@ public class RenderFrame extends ImageFrame {
                 }
 
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(200); // Delay between repaints
                 } catch (InterruptedException e) {
                     // Empty by intention
                 }

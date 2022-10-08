@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage;
 
 public class ImageFrame extends JFrame {
 
-    protected BufferedImage image = null;
     protected JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    protected ImagePanel imagePanel = new ImagePanel();
 
     public ImageFrame(String title) {
         super(title);
@@ -30,22 +30,17 @@ public class ImageFrame extends JFrame {
     }
 
     protected void initUI() {
+        scrollPane.setViewportView(imagePanel);
         add(scrollPane);
     }
 
-
     public void setImage(BufferedImage image) {
-        this.image = image;
-
-        final ImageIcon imageIcon = new ImageIcon(image);
-        final JLabel label = new JLabel(imageIcon);
-        scrollPane.setViewportView(label);
-
+        imagePanel.setImage(image);
         resizeFrame();
     }
 
     public BufferedImage getImage() {
-        return image;
+        return imagePanel.getImage();
     }
 
     protected void resizeFrame() {
