@@ -3,11 +3,16 @@ package se.cha.frame;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class RenderFrame extends ImageFrame {
 
@@ -16,7 +21,9 @@ public class RenderFrame extends ImageFrame {
     private JProgressBar progressBar;
     private JLabel timeElapsedInfoLabel;
     private JLabel timeRemainingInfoLabel;
+    private JLabel timeFinishedInfoLabel;
     // private JLabel programInfoLabel;
+    private JButton resizeButton;
 
     private RepaintTimer repaintTimer = new RepaintTimer(this, 500);
     private boolean pause = false;
@@ -97,11 +104,34 @@ public class RenderFrame extends ImageFrame {
             final int minutesLeft = ((amountSecondsLeft - secondsLeft) / 60) % 60;
             final int hoursLeft = amountSecondsLeft / 3600;
 
+            final Date finishTime = new Date(time + predictedTimeLeft);
+
+            final Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            final boolean finishToday = finishTime.before(calendar.getTime());
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            final boolean finishTomorrow = !finishToday && finishTime.before(calendar.getTime());
+
+            String finishDateText = "";
+            if (finishToday) {
+                finishDateText = "";
+            } else if (finishTomorrow) {
+                finishDateText = ", tomorrow";
+            } else {
+                finishDateText = ", " + SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(finishTime);
+            }
+
             timeElapsedInfoLabel.setText("Elapsed: " + hoursElapsed + "h " + minutesElapsed + "m " + secondsElapsed + "s");
             timeRemainingInfoLabel.setText("Remaining: " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft + "s");
+            timeFinishedInfoLabel.setText("Finished: " + SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(finishTime) + finishDateText);
         } else {
             timeElapsedInfoLabel.setText("Elapsed:");
             timeRemainingInfoLabel.setText("Remaining:");
+            timeFinishedInfoLabel.setText("Finished:");
         }
 
     }
@@ -113,7 +143,11 @@ public class RenderFrame extends ImageFrame {
 
         timeRemainingInfoLabel = new JLabel(" ");
         timeElapsedInfoLabel = new JLabel(" ");
+        timeFinishedInfoLabel = new JLabel(" ");
         // programInfoLabel = new JLabel(" ");
+
+        resizeButton = new JButton("Resize");
+        resizeButton.addActionListener(e -> pack());
 
         layoutComponents();
     }
@@ -123,14 +157,20 @@ public class RenderFrame extends ImageFrame {
         final Insets insets = new Insets(2, 4, 2, 4);
         GridBagConstraints gbc;
 
-        gbc = new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
+        gbc = new GridBagConstraints(0, 0, 3, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
         infoPanel.add(progressBar, gbc);
 
-        gbc = new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
+        gbc = new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
         infoPanel.add(timeElapsedInfoLabel, gbc);
 
-        gbc = new GridBagConstraints(0, 2, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
+        gbc = new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
         infoPanel.add(timeRemainingInfoLabel, gbc);
+
+        gbc = new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 10, 0);
+        infoPanel.add(timeFinishedInfoLabel, gbc);
+
+        gbc = new GridBagConstraints(2, 1, 1, 2, 0, 0, GridBagConstraints.NORTHEAST, GridBagConstraints.BOTH, insets, 0, 0);
+        infoPanel.add(resizeButton, gbc);
 
         //gbc = new GridBagConstraints(0, 3, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets, 0, 0);
         //infoPanel.add(programInfoLabel, gbc);

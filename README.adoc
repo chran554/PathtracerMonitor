@@ -4,14 +4,17 @@ This is a helper application for my pathtracer, but It is really agnostic to any
 
 It listens on pixelinformation broadcasts on UDP and renders them in an image window.
 
-Do note that this is only a monitor showing image render progress of a separate running application. As such pixel information in this application can be lost due to late start of the monitor (some pixel information can already be sent by the render application).
+.PathtracerMonitor showing continuous progress during render.
+image::documentation/images/pathtracermonitor-screenshot.png[Pathtracer monitor screenshot]
+
+NOTE:: This is only a monitor asynchronously showing image render progress of a separate running application. As such pixel information in this application can be lost due to late start of the monitor (some pixel information can already be sent by the render application).
 Pixel information can also be lost as UDP packets can be lost over network or hardware network buffers may overflow pruning UDP calls.
 
-Nevertheless, it is a useful tool to quickly check render progress.
+It is a useful tool to quickly check render progress and quality before complete image is done.
 
 ## Broadcast listening
 
-It listens to broadcasts on 230.0.0.0:9999.
+It listens to UDP broadcasts on `230.0.0.0:9999`.
 
 ## Broadcast packet format
 
